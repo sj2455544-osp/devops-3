@@ -1,0 +1,401 @@
+{
+	"info": {
+		"name": "CIMAGE API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_postman_id": "cimage-api-collection-0001"
+	},
+	"variable": [
+		{ "key": "baseUrl", "value": "{{baseUrl}}" },
+		{ "key": "access_token", "value": "{{access_token}}" }
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+	},
+	"event": [],
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/users/register/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "register", ""] },
+						"auth": { "type": "noauth" },
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"demo_user\",\n  \"email\": \"demo@example.com\",\n  \"mobile\": \"9999999999\",\n  \"password\": \"Demo@12345\",\n  \"cnf_password\": \"Demo@12345\",\n  \"captcha_token\": \"test-token\"\n}"
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Created or error present', function () { pm.expect([200,201,400]).to.include(pm.response.code); });",
+									"if (pm.response.code === 201 || pm.response.code === 200) {",
+									"  const json = pm.response.json();",
+									"  pm.environment.set('access_token', json.token.access_token);",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/users/login/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "login", ""] },
+						"auth": { "type": "noauth" },
+						"body": { "mode": "raw", "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"Demo@12345\"\n}" }
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Login OK', function () { pm.expect([200,401,400]).to.include(pm.response.code); });",
+									"if (pm.response.code === 200) { const json = pm.response.json(); pm.environment.set('access_token', json.token.access_token); }"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Me: Get Profile",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/users/@me/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "@me", ""] }
+					}
+				},
+				{
+					"name": "Me: Update Profile",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/users/@me/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "@me", ""] },
+						"body": { "mode": "raw", "raw": "{\n  \"username\": \"demo_user2\",\n  \"name\": \"Demo\"\n}" }
+					}
+				},
+				{
+					"name": "Me: Change Password",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/users/@me/change-password/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users", "@me", "change-password", ""] },
+						"body": { "mode": "raw", "raw": "{\n  \"new_password\": \"Demo@12345_new\",\n  \"confirm_password\": \"Demo@12345_new\"\n}" }
+					}
+				}
+			]
+		},
+		{
+			"name": "Courses",
+			"item": [
+				{
+					"name": "List Courses (published only)",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/courses/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses", ""] }
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Courses list 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+									"let data = pm.response.json();",
+									"if (Array.isArray(data)) { if (data.length) pm.environment.set('course_slug', data[0].slug); }",
+									"if (data && Array.isArray(data.results)) { if (data.results.length) pm.environment.set('course_slug', data.results[0].slug); }"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "List Courses by Technology",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/courses/?technology={{technology_slug}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "courses", ""],
+							"query": [{ "key": "technology", "value": "{{technology_slug}}" }]
+						}
+					}
+				},
+				{
+					"name": "Get Course (by id or slug)",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/courses/{{course_slug}}/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses", "{{course_slug}}", ""] }
+					}
+				},
+				{
+					"name": "Enroll in Course",
+					"request": {
+						"method": "POST",
+						"url": { "raw": "{{baseUrl}}/api/v1/courses/{{course_slug}}/enroll/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses", "{{course_slug}}", "enroll", ""] }
+					}
+				},
+				{
+					"name": "My Enrolled Courses",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/courses/enrolled/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "courses", "enrolled", ""] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Technologies",
+			"item": [
+				{
+					"name": "List Technologies",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/technologies/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "technologies", ""] } },
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Technologies list 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+									"let data = pm.response.json();",
+									"if (Array.isArray(data)) { if (data.length) pm.environment.set('technology_slug', data[0].slug); }",
+									"if (data && Array.isArray(data.results)) { if (data.results.length) pm.environment.set('technology_slug', data.results[0].slug); }"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "List by Sector",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/technologies/?sector=AI",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "technologies", ""],
+							"query": [{ "key": "sector", "value": "AI" }]
+						}
+					}
+				},
+				{
+					"name": "Get Technology",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/technologies/{{technology_slug}}/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "technologies", "{{technology_slug}}", ""] }
+					}
+				},
+				{
+					"name": "Explore Technologies (with featured courses)",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/technologies/explore/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "technologies", "explore", ""] } }
+				}
+			]
+		},
+		{
+			"name": "Communities",
+			"item": [
+				{
+					"name": "List Communities",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/v1/communities/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "communities", ""] } },
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Communities list 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+									"let data = pm.response.json();",
+									"let first = Array.isArray(data) ? data[0] : (data && Array.isArray(data.results) ? data.results[0] : null);",
+									"if (first && first.id) pm.environment.set('community_id', first.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Community",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "communities", "{{community_id}}", ""] }
+					}
+				},
+				{
+					"name": "List Threads",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/threads/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "communities", "{{community_id}}", "threads", ""] }
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Threads list 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+									"let data = pm.response.json();",
+									"let first = Array.isArray(data) ? data[0] : (data && Array.isArray(data.results) ? data.results[0] : null);",
+									"if (first && first.id) pm.environment.set('thread_id', first.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Create Thread",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/threads/", "host": ["{{baseUrl}}"], "path": ["api", "v1", "communities", "{{community_id}}", "threads", ""] },
+						"body": { "mode": "raw", "raw": "{\n  \"community\": {{community_id}},\n  \"title\": \"Welcome\",\n  \"content\": \"Say hi!\"\n}" }
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Thread created', function () { pm.expect([200,201,400,403]).to.include(pm.response.code); });",
+									"if (pm.response.code === 201 || pm.response.code === 200) { const json = pm.response.json(); pm.environment.set('thread_id', json.id); }"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Thread",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/threads/{{thread_id}}/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "communities", "{{community_id}}", "threads", "{{thread_id}}", ""]
+						}
+					}
+				},
+				{
+					"name": "Update Thread",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/threads/{{thread_id}}/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "communities", "{{community_id}}", "threads", "{{thread_id}}", ""]
+						},
+						"body": { "mode": "raw", "raw": "{\n  \"title\": \"Welcome updated\"\n}" }
+					}
+				},
+				{
+					"name": "Delete Thread",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/threads/{{thread_id}}/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "communities", "{{community_id}}", "threads", "{{thread_id}}", ""]
+						}
+					}
+				},
+				{
+					"name": "List Messages",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/threads/{{thread_id}}/messages/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "communities", "{{community_id}}", "threads", "{{thread_id}}", "messages", ""]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Messages list 200', function () { pm.expect(pm.response.code).to.eql(200); });",
+									"let data = pm.response.json();",
+									"let first = Array.isArray(data) ? data[0] : (data && Array.isArray(data.results) ? data.results[0] : null);",
+									"if (first && first.id) pm.environment.set('message_id', first.id);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Create Message",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/threads/{{thread_id}}/messages/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "communities", "{{community_id}}", "threads", "{{thread_id}}", "messages", ""]
+						},
+						"body": { "mode": "raw", "raw": "{\n  \"thread\": {{thread_id}},\n  \"content\": \"Hello!\"\n}" }
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Message created', function () { pm.expect([200,201,400,403]).to.include(pm.response.code); });",
+									"if (pm.response.code === 201 || pm.response.code === 200) { const json = pm.response.json(); pm.environment.set('message_id', json.id); }"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Message",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/threads/{{thread_id}}/messages/{{message_id}}/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "communities", "{{community_id}}", "threads", "{{thread_id}}", "messages", "{{message_id}}", ""]
+						}
+					}
+				},
+				{
+					"name": "Update Message",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/threads/{{thread_id}}/messages/{{message_id}}/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "communities", "{{community_id}}", "threads", "{{thread_id}}", "messages", "{{message_id}}", ""]
+						},
+						"body": { "mode": "raw", "raw": "{\n  \"content\": \"Edited\"\n}" }
+					}
+				},
+				{
+					"name": "Delete Message",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/communities/{{community_id}}/threads/{{thread_id}}/messages/{{message_id}}/",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "v1", "communities", "{{community_id}}", "threads", "{{thread_id}}", "messages", "{{message_id}}", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Django Admin",
+			"item": [
+				{ "name": "Admin Login Page", "request": { "method": "GET", "auth": { "type": "noauth" }, "url": { "raw": "{{baseUrl}}/admin/", "host": ["{{baseUrl}}"], "path": ["admin", ""] } } }
+			]
+		}
+	]
+}

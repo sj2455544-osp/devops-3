@@ -1,0 +1,36 @@
+version: 1
+backend:
+  phases:
+    build:
+      commands:
+        - '# Echo "Backend build completed"'
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+        - echo "DB_HOST=addons.clq6y60aosy2.ap-south-1.rds.amazonaws.com" > .env.production
+        - echo "DB_PORT=3306" >> .env.production
+        - echo "DB_USER=admin" >> .env.production
+        - echo "DB_PASSWORD=Cimage!7301694135" >> .env.production
+        - echo "DB_NAME=addons" >> .env.production
+        - echo "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" >> .env.production
+        - echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env.production
+        - echo "AWS_REGION=ap-south-1" >> .env.production
+        - echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> .env.production
+        - echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env.production
+        - echo "NEXT_PUBLIC_API_BASE_URL=https://api.addons.cimage.in" >> .env.production
+    build:
+      commands:
+        - npm run build
+    postBuild:
+      commands:
+        - echo "Build completed"
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+

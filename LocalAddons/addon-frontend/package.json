@@ -1,0 +1,39 @@
+{
+  "name": "addoncourses",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@hcaptcha/react-hcaptcha": "^1.12.1",
+    "@mui/material": "^7.3.2",
+    "@types/react-google-recaptcha": "^2.1.9",
+    "@wojtekmaj/react-recaptcha-v3": "^0.1.4",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.544.0",
+    "mysql2": "^3.15.0",
+    "next": "15.5.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-google-recaptcha": "^3.1.0",
+    "react-icons": "^5.5.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
